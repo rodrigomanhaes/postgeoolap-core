@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="org/postgeoolap/core/aspect/LoggingAspect.aj" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/PostGreSQL JDBC"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Derby"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/CommonsLogging"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Log4J"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JUnit"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>

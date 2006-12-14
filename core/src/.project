@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>postgeoolap-core-1.0</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>classes</name>
+			<type>2</type>
+			<location>F:/postgeoolap/postgeoolap-core-1.0/classes</location>
+		</link>
+		<link>
+			<name>conf</name>
+			<type>2</type>
+			<location>F:/postgeoolap/postgeoolap-core-1.0/conf</location>
+		</link>
+	</linkedResources>
+</projectDescription>
