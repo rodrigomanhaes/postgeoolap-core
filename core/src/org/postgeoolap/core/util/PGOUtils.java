@@ -49,7 +49,7 @@ public class PGOUtils
 	
 	public static String readContent(File file)
 	{
-		StringBuffer contents = new StringBuffer();
+		StringBuilder contents = new StringBuilder();
 		BufferedReader input = null;
 		try
 		{
