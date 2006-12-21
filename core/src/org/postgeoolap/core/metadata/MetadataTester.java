@@ -20,4 +20,16 @@ public class MetadataTester
 	{
 		Assert.assertTrue(MetadataHandler.instance().createTables());
 	}
+	
+	@Test
+	public void testClearCubes() throws Exception
+	{
+		Assert.assertTrue(MetadataHandler.instance().clearCubes());
+	}
+	
+	@Test
+	public void testClearEmptyCubes() throws Exception
+	{
+		Assert.assertTrue(MetadataHandler.instance().clearEmptyCubes());
+	}
 }

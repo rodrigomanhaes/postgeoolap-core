@@ -95,7 +95,7 @@ public class MetadataHandler
 		return true;
 	}
 	
-	public void clearEmptyCubes()
+	public boolean clearEmptyCubes()
 	{
 		Connection connection = MetadataConnection.connection();
 		
@@ -109,34 +109,38 @@ public class MetadataHandler
 			Statement statement = connection.createStatement();
 			statement.execute(sql);
 			log.info("Empty cubes removed");
+			return true;
 		}
 		catch (SQLException e)
 		{
 			log.error("Error on removing empty cubes: " + e.getMessage());
+			return false;
 		}
 	}
 	
-	public void clearCubes()
+	public boolean clearCubes()
 	{
 		Connection connection = MetadataConnection.connection();
 		try
 		{
 			Statement statement = connection.createStatement();
-			log.info("Cleaning all cubes...");
+			log.info("Start cleaning all cubes...");
 			statement.execute("DELETE FROM aggregationitem");
-			log.info("aggregationitem clean");
+			log.info("AGGREGATIONITEM clean");
 			statement.execute("DELETE FROM aggregation");
-			log.info("aggregation clean");
+			log.info("AGGREGATION clean");
 			statement.execute("DELETE FROM attribute");
-			log.info("attribute clean");
+			log.info("ATTRIBUTE clean");
 			statement.execute("DELETE FROM dimension");
-			log.info("dimension clean");
+			log.info("DIMENSION clean");
 			statement.execute("DELETE FROM cube");
-			log.info("cube clean");
+			log.info("CUBE clean");
+			return true;
 		}
 		catch (SQLException e)
 		{
 			log.error("Error on removing cubes: " + e.getMessage());
+			return false;
 		}
 	}
 	
@@ -195,7 +199,7 @@ public class MetadataHandler
 		ResultSet result = submitQuery(sql, params);
 		try
 		{
-			return result.getInt(0);
+			return result.next() ? result.getInt(0) : Integer.MIN_VALUE;
 		}
 		catch (Exception e) 
 		{
