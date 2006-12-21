@@ -7,7 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.postgeoolap.core.util.PGOUtils;
 
-public class MetadataConnection 
+class MetadataConnection 
 {
 	private static Connection connection;
 	

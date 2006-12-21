@@ -5,7 +5,5 @@ CREATE TABLE esquema
   username varchar(50),
   password varchar(50),
   server varchar(50),
-  map varchar(255),
-  srid integer,
   CONSTRAINT pk_schema PRIMARY KEY (schemacode)
 )

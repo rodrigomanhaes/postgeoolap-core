@@ -4,7 +4,7 @@ CREATE TABLE aggregation
   name varchar(50) NOT NULL,
   base varchar(1),
   sqlbase varchar(500),
-  cubecode integer,
+  cubecode integer NOT NULL,
   sorting integer,
   CONSTRAINT pk_aggregation PRIMARY KEY (aggregationcode),
   CONSTRAINT fk_aggregation_cube FOREIGN KEY (cubecode) REFERENCES cube (cubecode)

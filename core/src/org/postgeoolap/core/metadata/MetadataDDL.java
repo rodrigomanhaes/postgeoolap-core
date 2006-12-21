@@ -18,21 +18,21 @@ public enum MetadataDDL
 	private String createTable;
 	private String dropTable;
 	
-	public String createTable()
+	String createTable()
 	{
 		if (createTable == null)
 			createTable = loadSQL("createtable");
 		return createTable;
 	}
 	
-	public String dropTable()
+	String dropTable()
 	{
 		if (dropTable == null)
 			dropTable = loadSQL("droptable");
 		return dropTable;
 	}
 	
-	private String loadSQL(String action)
+	String loadSQL(String action)
 	{
 		File file = PGOUtils.loadFile("org/postgeoolap/core/metadata/ddl/" +  
 			this.name().toLowerCase() + "_" + action + ".sql");
