@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -39,12 +40,18 @@ public class Schema implements Serializable
 	public void persist() throws ModelException
 	{
 		Session session = HibernateUtils.openSession();
+		Transaction transaction = session.beginTransaction();
 		try
 		{
 			if (id == -1)
 				session.save(this);
 			else
 				session.update(this);
+			transaction.commit();
+		}
+		catch (HibernateException e)
+		{
+			transaction.rollback();
 		}
 		finally
 		{
@@ -119,6 +126,10 @@ public class Schema implements Serializable
 		{
 			session.delete(this);
 			transaction.commit();
+		}
+		catch (HibernateException e)
+		{
+			transaction.rollback();
 		}
 		finally
 		{

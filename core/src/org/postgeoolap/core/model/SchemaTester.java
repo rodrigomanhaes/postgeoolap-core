@@ -2,12 +2,11 @@ package org.postgeoolap.core.model;
 
 import java.util.Set;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 public class SchemaTester extends TestCase 
 {
-	public void testSave() throws Exception
+/*	public void testSave() throws Exception
 	{
 		Schema schema = new Schema();
 		schema.setName("PMCI");
@@ -19,7 +18,7 @@ public class SchemaTester extends TestCase
 		Assert.assertTrue(schema.getId() != -1);
 		System.out.println(schema.getId());
 	}
-	
+*/	
 	public void testGetAll() throws Exception
 	{
 		Set<Schema> set = Schema.getAll();
@@ -35,14 +34,8 @@ public class SchemaTester extends TestCase
 	
 	public void testDelete() throws Exception
 	{
-		Schema schema = new Schema();
-		schema.setName("PMCI");
-		schema.setServer("localhost");
-		schema.setUser("postgres");
-		schema.setPassword("postgres");
-		schema.setId(1);
+		Set<Schema> set = Schema.getAll();
+		Schema schema = set.iterator().next();
 		schema.delete();
-		testGetAll();
-		
 	}
 }
