@@ -2,7 +2,7 @@ package org.postgeoolap.core.metadata;
 
 import java.io.File;
 
-import org.postgeoolap.core.util.PGOUtils;
+import org.postgeoolap.core.util.Utils;
 
 public enum MetadataDDL 
 {
@@ -34,8 +34,8 @@ public enum MetadataDDL
 	
 	String loadSQL(String action)
 	{
-		File file = PGOUtils.loadFile("org/postgeoolap/core/metadata/ddl/" +  
+		File file = Utils.loadFile("org/postgeoolap/core/metadata/ddl/" +  
 			this.name().toLowerCase() + "_" + action + ".sql");
-		return PGOUtils.readContent(file);
+		return Utils.readContent(file);
 	}
 }

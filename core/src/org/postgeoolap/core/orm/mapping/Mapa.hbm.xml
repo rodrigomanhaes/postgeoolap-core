@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.postgeoolap.core.model" default-lazy="true">
+
+	<class name="Mapa" table="map">
+		<id name="id">
+			<column name="mapcode" not-null="true"/>
+			<generator class="identity"/>
+		</id>
+		
+		<property name="name">
+			<column name="name" not-null="true"/>
+		</property>
+		
+		<property name="srid">
+			<column name="srid"/>
+		</property>
+		
+		<many-to-one name="schema" column="schemacode" 
+			class="Schema" not-null="true" cascade="save-update"/>
+	</class>
+
+</hibernate-mapping>

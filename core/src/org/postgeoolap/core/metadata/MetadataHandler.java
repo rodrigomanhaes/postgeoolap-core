@@ -10,8 +10,6 @@ import static org.postgeoolap.core.metadata.MetadataDDL.ESQUEMA;
 import static org.postgeoolap.core.metadata.MetadataDDL.MAP;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -38,7 +36,6 @@ public class MetadataHandler
 		dependencies.add(AGGREGATIONITEM);
 		dependencies.add(CNSAGGREGATION);
 	}
-
 	
 	public static MetadataHandler instance()
 	{
@@ -49,12 +46,11 @@ public class MetadataHandler
 	{
 	}
 	
-	public boolean createTables()
+	public boolean createTables() throws MetadataException
 	{
 		dropTables();
 		
 		Connection connection = MetadataConnection.connection();
-		boolean result = true;
 		
 		for (MetadataDDL ddl: dependencies)
 		{
@@ -68,13 +64,14 @@ public class MetadataHandler
 			catch (SQLException e)
 			{
 				log.error(e.getMessage(), e);
-				result = false;
+				throw new MetadataException("Error on creating tables" , e);
 			}
 		}
-		return result;
+		
+		return true;		
 	}
 	
-	public boolean dropTables()
+	public boolean dropTables() throws MetadataException
 	{
 		Connection connection = MetadataConnection.connection();
 		
@@ -89,13 +86,15 @@ public class MetadataHandler
 			}
 			catch (SQLException e)
 			{
-				log.error("Can't drop " + ddl.name() + ": " + e.getMessage());
+				String message = "Can't drop " + ddl.name();
+				log.error(message + ": " + e.getMessage());
+				throw new MetadataException(message , e);
 			}
 		}
 		return true;
 	}
 	
-	public boolean clearEmptyCubes()
+	public boolean clearEmptyCubes() throws MetadataException
 	{
 		Connection connection = MetadataConnection.connection();
 		
@@ -114,11 +113,11 @@ public class MetadataHandler
 		catch (SQLException e)
 		{
 			log.error("Error on removing empty cubes: " + e.getMessage());
-			return false;
+			throw new MetadataException("Error on removing empty cubes", e);
 		}
 	}
 	
-	public boolean clearCubes()
+	public boolean clearCubes() throws MetadataException
 	{
 		Connection connection = MetadataConnection.connection();
 		try
@@ -140,71 +139,8 @@ public class MetadataHandler
 		catch (SQLException e)
 		{
 			log.error("Error on removing cubes: " + e.getMessage());
-			return false;
+			throw new MetadataException("Error on removing cubes", e); 
 		}
 	}
-	
-	public boolean submit(String sql)
-	{
-		return submit(sql, new Object[] {});
-	}
-	
-	public boolean submit(String sql, Object... params)
-	{
-		Connection connection = MetadataConnection.connection();
-		
-		try
-		{
-			PreparedStatement statement = connection.prepareStatement(sql);
-			statement.execute(sql);
-			for (int i = 0; i < params.length; i++)
-				statement.setObject(i+1, params[i]);
-			log.info("Submit command: " + sql);
-			return true;
-		}
-		catch (SQLException e)
-		{
-			log.error("Error submiting command " + sql + "\n" + e.getMessage());
-			throw new IllegalArgumentException(e);
-		}
-	}
-	
-	public ResultSet submitQuery(String sql)
-	{
-		return submitQuery(sql, new Object[] {});
-	}
-	
-	public ResultSet submitQuery(String sql, Object... params)
-	{
-		Connection connection = MetadataConnection.connection();
-		
-		try
-		{
-			PreparedStatement statement = connection.prepareStatement(sql);
-			for (int i = 0; i < params.length; i++)
-				statement.setObject(i+1, params[i]);
-			ResultSet result = statement.executeQuery(sql);
-			log.info("Submit query: " + sql);
-			return result;
-		}
-		catch (SQLException e)
-		{
-			log.error("Error submiting query " + sql + "\n" + e.getMessage());
-			throw new IllegalArgumentException(e);
-		}
-	}
-	
-	public int askNumber(String sql, Object... params)
-	{
-		ResultSet result = submitQuery(sql, params);
-		try
-		{
-			return result.next() ? result.getInt(0) : Integer.MIN_VALUE;
-		}
-		catch (Exception e) 
-		{
-			log.error(e.getMessage());
-			throw new IllegalArgumentException(e);
-		}
-	}
+
 }

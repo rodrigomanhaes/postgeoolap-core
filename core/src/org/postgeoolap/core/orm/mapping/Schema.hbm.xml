@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.postgeoolap.core.model" default-lazy="true">
+
+	<class name="Schema" table="esquema">
+		<id name="id">
+			<column name="schemacode" not-null="true"/>
+			<generator class="identity"/>
+		</id>
+		
+		<property name="name">
+			<column name="name" not-null="true"/>
+		</property>
+		
+		<property name="user">
+			<column name="username" not-null="true"/>
+		</property>
+		
+		<property name="password">
+			<column name="password" not-null="true"/>
+		</property>
+		
+		<property name="server">
+			<column name="server" not-null="true"/>
+		</property>
+		
+		<set name="maps" inverse="true" cascade="all">
+			<key column="schemacode"/>
+			<one-to-many class="Mapa"/>
+		</set>
+		
+	</class>
+
+</hibernate-mapping>
