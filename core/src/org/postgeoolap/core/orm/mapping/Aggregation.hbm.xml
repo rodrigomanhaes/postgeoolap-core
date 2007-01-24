@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.postgeoolap.core.model" default-lazy="true">
+
+	<class name="Aggregation" table="aggregation">
+		<id name="id">
+			<column name="aggregationcode" not-null="true"/>
+			<generator class="identity"/>
+		</id>
+		
+		<property name="name">
+			<column name="name" not-null="true"/>
+		</property>
+		
+		<property name="base">
+			<column name="base" not-null="true" />
+		</property>
+		
+		<property name="sqlBase">
+			<column name="sqlbase" not-null="true" />
+		</property>
+		
+		<property name="order">
+			<column name="sorting" not-null="true" />
+		</property>
+		
+		<many-to-one name="cube" column="cubecode" 
+			class="Cube" not-null="true"/>
+			
+		<set name="attributes" cascade="save-update" table="aggregationitem" lazy="true">
+			<key column="aggregationcode"/>
+			<many-to-many class="Attribute" column="attributecode"/>
+		</set>
+		
+	</class>
+
+</hibernate-mapping>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.postgeoolap.core.model" default-lazy="true">
+
+	<class name="Attribute" table="attribute">
+		<id name="id">
+			<column name="attributecode" not-null="true"/>
+			<generator class="identity"/>
+		</id>
+		
+		<property name="name">
+			<column name="name" not-null="true"/>
+		</property>
+		
+		<property name="physicalName">
+			<column name="physicalname" not-null="true"/>
+		</property>
+		
+		<property name="size">
+			<column name="size"/>
+		</property>
+		
+		<property name="level">
+			<column name="level" not-null="true" />
+		</property>
+		
+		<property name="standard">
+			<column name="standard" not-null="true" />
+		</property>
+		
+		<property name="internalAggregationType">
+			<column name="aggregationtype" not-null="true" />
+		</property>
+		
+		<property name="type">
+			<column name="attributetype" not-null="true" />
+		</property>
+		
+		<many-to-one name="dimension" column="dimensioncode" 
+			class="Dimension" not-null="true"/>
+			
+	</class>
+
+</hibernate-mapping>
