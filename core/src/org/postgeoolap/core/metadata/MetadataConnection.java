@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.util.Utils;
 
 public class MetadataConnection 
@@ -37,12 +38,12 @@ public class MetadataConnection
 			catch (ClassNotFoundException e)
 			{
 				log.error(e.getMessage(), e);
-				JOptionPane.showMessageDialog(null, "Cannot found Apache Derby JDBC class driver");
+				JOptionPane.showMessageDialog(null, Local.getString("error.derby_driver_not_found"));
 			}
 			catch (SQLException e)
 			{
 				log.error(e.getMessage(), e);
-				JOptionPane.showMessageDialog(null, "Cannot connect to Apache Derby");
+				JOptionPane.showMessageDialog(null, Local.getString("error.cannot_connect_metadata"));
 			} 
 		}
 		return connection;

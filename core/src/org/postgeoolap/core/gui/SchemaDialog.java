@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
 
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -19,18 +20,20 @@ import javax.swing.JTextField;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.gui.auxiliary.MapFileFilter;
 import org.postgeoolap.core.gui.auxiliary.MapTableModel;
 import org.postgeoolap.core.gui.auxiliary.OkCancelDialog;
+import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.model.Mapa;
 import org.postgeoolap.core.model.Schema;
 import org.postgeoolap.core.model.exception.ModelException;
-import org.postgeoolap.core.util.SwingUtils;
 
 @SuppressWarnings("serial")
 public class SchemaDialog extends OkCancelDialog 
 {
 	private JTextField name;
+	private JTextField databaseName;
 	private JTextField server;
 	private JTextField user;
 	private JTable maps;
@@ -41,17 +44,18 @@ public class SchemaDialog extends OkCancelDialog
 	
 	private Schema schema;
 	
-	public SchemaDialog(String title)
+	public SchemaDialog()
 	{
-		this(title, null);
+		this(null);
 	}
 	
-	public SchemaDialog(String title, Schema schema)
+	public SchemaDialog(Schema schema)
 	{
-		super(title);
+		super(Local.getString("title.schema"));
 		init();
 		build();
 		pack();
+		SwingUtils.centralize(this);
 		
 		including = schema == null;
 		if (!including)
@@ -64,12 +68,13 @@ public class SchemaDialog extends OkCancelDialog
 	private void init()
 	{
 		name = new JTextField(30);
+		databaseName = new JTextField(30);
 		server = new JTextField(30);
 		user = new JTextField(15);
 		maps = new JTable(new MapTableModel(new Mapa[] {}));
 		menu = new JPopupMenu();
 		
-		JMenuItem includeMap = new JMenuItem("Include map");
+		JMenuItem includeMap = new JMenuItem(Local.getString("command.include_map"));
 		includeMap.addActionListener(
 			new ActionListener()
 			{
@@ -80,7 +85,7 @@ public class SchemaDialog extends OkCancelDialog
 			}
 		);
 		
-		final JMenuItem deleteMap = new JMenuItem("Delete map");
+		final JMenuItem deleteMap = new JMenuItem(Local.getString("command.delete_map"));
 		deleteMap.addActionListener(
 			new ActionListener()
 			{
@@ -131,12 +136,14 @@ public class SchemaDialog extends OkCancelDialog
 		panel.setLayout(new GridBagLayout());
 		int y = -1;
 		
-		SwingUtils.addGridBagLabelTextField(panel, new JLabel("Name: "),name, 
-			0, ++y, 1, 1, 1, GridBagConstraints.HORIZONTAL, new Insets(3, 3, 3, 3));
-		SwingUtils.addGridBagLabelTextField(panel, new JLabel("Server: "), server, 
-			0, ++y, 1, 1, 1, GridBagConstraints.HORIZONTAL);
-		SwingUtils.addGridBagLabelTextField(panel, new JLabel("User: "), user, 
-			0, ++y, 1, 1, 1, GridBagConstraints.NONE);
+		SwingUtils.addGridBagLabelTextField(panel, new JLabel(Local.getString("label.name")),
+			name, 0, ++y, 1, 1, 1, GridBagConstraints.HORIZONTAL, new Insets(3, 3, 3, 3));
+		SwingUtils.addGridBagLabelTextField(panel, new JLabel(Local.getString("label.database")),
+			databaseName, 0, ++y, 1, 1, 1, GridBagConstraints.HORIZONTAL);
+		SwingUtils.addGridBagLabelTextField(panel, new JLabel(Local.getString("label.server")), 
+			server,	0, ++y, 1, 1, 1, GridBagConstraints.HORIZONTAL);
+		SwingUtils.addGridBagLabelTextField(panel, new JLabel(Local.getString("label.user")), 
+			user, 0, ++y, 1, 1, 1, GridBagConstraints.NONE);
 		SwingUtils.addGridBagComponent(panel, SwingUtils.scrollComponent(maps, 150),
 			0, ++y, 2, 1, GridBagConstraints.CENTER, GridBagConstraints.NONE);
 		
@@ -163,7 +170,8 @@ public class SchemaDialog extends OkCancelDialog
 			}
 			catch (ModelException exception)
 			{
-				JOptionPane.showMessageDialog(null, exception.getMessage() + "\nOperation not committed");
+				JOptionPane.showMessageDialog(null, exception.getMessage() + "\n" + 
+					Local.getString("message.operation_not_committed"));
 			}
 		}
 	}
@@ -175,6 +183,7 @@ public class SchemaDialog extends OkCancelDialog
 	private void updateWidgets()
 	{
 		name.setText(schema.getName());
+		databaseName.setText(schema.getDatabaseName());
 		server.setText(schema.getServer());
 		user.setText(schema.getUser());
 		((MapTableModel) maps.getModel()).addMaps(schema.getMaps().toArray(new Mapa[] {}));
@@ -185,6 +194,7 @@ public class SchemaDialog extends OkCancelDialog
 		if (schema == null)
 			schema = new Schema();
 		schema.setName(name.getText());
+		schema.setDatabaseName(databaseName.getText());;
 		schema.setServer(server.getText());
 		schema.setUser(user.getText());
 		schema.setMaps(((MapTableModel) maps.getModel()).getMaps());
@@ -195,30 +205,37 @@ public class SchemaDialog extends OkCancelDialog
 		return schema;
 	}
 	
+	private File lastDirectory = null;
+	
 	public void includeMap()
 	{
-		JFileChooser chooser = new JFileChooser();
+		JFileChooser chooser = lastDirectory != null ? 
+			new JFileChooser(lastDirectory) : new JFileChooser();
 		MapFileFilter filter = new MapFileFilter();
 		filter.addExtension("gml");
 		filter.addExtension("shp");
 		chooser.setFileFilter(filter);
-		chooser.setApproveButtonText("Ok");
-		chooser.setApproveButtonMnemonic('O');
+		chooser.setApproveButtonText(Local.getString("command.ok"));
+		chooser.setApproveButtonMnemonic(Local.getString("shortcut.ok").charAt(0));
 		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
 		{
 			int srid = -1;
 			do 
 			{
+				if (((MapTableModel) maps.getModel()).exist(chooser.getSelectedFile().getAbsolutePath()))
+					break;
 				boolean exit = false;
 				try
 				{
-					srid = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter map SRID", "Maps", 
+					srid = Integer.parseInt(JOptionPane.showInputDialog(null, 
+						Local.getString("label.enter_map_srid"), Local.getString("label.maps"), 
 						JOptionPane.INFORMATION_MESSAGE));
 				}
 				catch (NumberFormatException e)
 				{
-					exit =  JOptionPane.showConfirmDialog(null, "SRID is an integer number. The value you " +
-						"entered was not an integer. Do you want cancel operation?", "Maps", 
+					exit =  JOptionPane.showConfirmDialog(null, 
+						Local.getString("question.srid_integer"), 
+						Local.getString("label.maps"), 
 						JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
 					if (exit)
 						break;
@@ -229,6 +246,7 @@ public class SchemaDialog extends OkCancelDialog
 				map.setName(chooser.getSelectedFile().getAbsolutePath());
 				map.setSrid(srid);
 				((MapTableModel) maps.getModel()).addMap(map);
+				lastDirectory = chooser.getCurrentDirectory();
 				break;
 			}
 			while (true);

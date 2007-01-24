@@ -1,5 +1,6 @@
 package org.postgeoolap.core.util;
 
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,11 +10,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.swing.JOptionPane;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.orm.HibernateUtils;
 
 public class Utils 
@@ -23,7 +33,27 @@ public class Utils
 	public static final void init()
 	{
 		configureLog4JProperties();
+		verifyVideo();
 		HibernateUtils.getSessionFactory();
+	}
+	
+	private static void verifyVideo()
+	{
+		int width = Toolkit.getDefaultToolkit().getScreenSize().width;
+		int height = Toolkit.getDefaultToolkit().getScreenSize().height;
+		
+		if (width < 1024 || height < 768)
+		{
+			String msg = MessageFormat.format(Local.getString("message.video_resolution_too_low"),
+				width, height); 
+			log.info(msg);
+			JOptionPane.showMessageDialog(null, msg, Local.getString("title.video_resolution"), 
+				JOptionPane.INFORMATION_MESSAGE);
+			System.exit(0);
+		}
+		else
+			log.info(MessageFormat.format(Local.getString("message.video_resolution_ok"),
+				width, height));
 	}
 	
 	private static void configureLog4JProperties()
@@ -138,7 +168,8 @@ public class Utils
 		{
 			URL url = ClassLoader.getSystemClassLoader().getResource(path);
 			if (url != null)
-				log.info("File " + path + " loaded");
+				log.info(MessageFormat.format(Local.getString("message.file_loaded"),
+					path));
 			return new File(url.toURI());
 		}
 		catch (URISyntaxException e)
@@ -184,5 +215,16 @@ public class Utils
 		}
 		
 		return contents.toString();
+	}
+	
+	public static <T> List<T> sortByStringRepresentation(Collection<T> collection)
+	{
+		List<T> list = new ArrayList<T>();
+		Map<String, T> map = new TreeMap<String, T>();
+		for (T t: collection)
+			map.put(t.toString(), t);
+		for (T t: map.values())
+			list.add(t);
+		return list;
 	}
 }

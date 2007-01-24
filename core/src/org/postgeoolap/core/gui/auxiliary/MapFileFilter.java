@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.swing.filechooser.FileFilter;
 
+import org.postgeoolap.core.i18n.Local;
+
 public class MapFileFilter extends FileFilter 
 {
 	private Set<String> extensions;
@@ -41,7 +43,7 @@ public class MapFileFilter extends FileFilter
 	@Override
 	public String getDescription() 
 	{
-		return "Map files";
+		return Local.getString("label.map_files");
 	}
 	
 	

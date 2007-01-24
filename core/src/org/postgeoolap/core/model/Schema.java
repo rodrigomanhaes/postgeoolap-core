@@ -4,17 +4,16 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.model.exception.ModelException;
-import org.postgeoolap.core.orm.HibernateUtils;
+import org.postgeoolap.core.orm.HelperException;
+import org.postgeoolap.core.orm.HibernateHelper;
 
 public class Schema implements Serializable
 {
@@ -24,10 +23,13 @@ public class Schema implements Serializable
 	
 	private long id;
 	private String name;
+	private String databaseName;
 	private String user;
 	private String password;
 	private String server;
 	private Set<Mapa> maps;
+	private Set<Table> tables;
+	private Set<Cube> cubes;
 	
 	private Connection connection;
 	
@@ -35,45 +37,48 @@ public class Schema implements Serializable
 	{
 		id = -1;
 		maps = new HashSet<Mapa>();
+		cubes = new HashSet<Cube>();
 	}
 	
 	public void persist() throws ModelException
 	{
-		Session session = HibernateUtils.openSession();
-		Transaction transaction = session.beginTransaction();
 		try
 		{
 			if (id == -1)
-				session.save(this);
+				HibernateHelper.save(this);
 			else
-				session.update(this);
-			transaction.commit();
+				HibernateHelper.update(this);
 		}
-		catch (HibernateException e)
+		catch (HelperException e)
 		{
-			transaction.rollback();
-		}
-		finally
-		{
-			session.close();
+			throw new ModelException(e.getMessage(), e);
 		}
 	}
 	
+	public void delete() throws ModelException
+	{
+		try
+		{
+			HibernateHelper.delete(this);
+		}
+		catch (HelperException e)
+		{
+			throw new ModelException(e.getMessage(), e);
+		}
+
+	}
+
 	@SuppressWarnings("unchecked")
 	public static Set<Schema> getAll() throws ModelException
 	{
-		Session session = HibernateUtils.openSession();
-		Set<Schema> set = null;
 		try
 		{
-			Query query = session.createQuery("from Schema"); 
-			set = new HashSet<Schema>(query.list());
+			return HibernateHelper.get("from Schema");
 		}
-		finally
+		catch (HelperException e)
 		{
-			session.close();
+			throw new ModelException(e.getMessage(), e);
 		}
-		return set;
 	}
 	
 	private boolean driverLoad = false;
@@ -89,19 +94,19 @@ public class Schema implements Serializable
 			catch (ClassNotFoundException e)
 			{
 				log.error(e.getMessage(), e);
-				throw new ModelException("Cannot find PostGreSQL JDBC driver class");
+				throw new ModelException(Local.getString("error.postgresql_driver_not_found"));
 			}
 		}
 		
 		try
 		{
 			connection = DriverManager.getConnection(
-				"jdbc:postgresql://" + server + ":5432/" + name, user, password.toString());
+				"jdbc:postgresql://" + server + ":5432/" + databaseName, user, password.toString());
 		}
 		catch (SQLException e)
 		{
 			log.error(e.getMessage(), e);
-			throw new ModelException("Cannot connect to data warehouse", e);
+			throw new ModelException(Local.getString("error.cannot_connect_to_dw"), e);
 		}
 	}
 	
@@ -114,26 +119,20 @@ public class Schema implements Serializable
 		catch (SQLException e)
 		{
 			log.error(e.getMessage(), e);
-			throw new ModelException("Error on disconnecting from data warehouse", e);
+			throw new ModelException(Local.getString("error.disconnecting_from_dw"), e);
 		}
 	}
 	
-	public void delete()
+	public boolean isConnected() throws ModelException
 	{
-		Session session = HibernateUtils.openSession();
-		Transaction transaction = session.beginTransaction();
 		try
 		{
-			session.delete(this);
-			transaction.commit();
+			return !connection.isClosed();
 		}
-		catch (HibernateException e)
+		catch (SQLException e)
 		{
-			transaction.rollback();
-		}
-		finally
-		{
-			session.close();
+			log.error(e.getMessage(), e);
+			throw new ModelException(e.getMessage(), e);
 		}
 	}
 	
@@ -177,6 +176,16 @@ public class Schema implements Serializable
 	{
 		this.name = name;
 	}
+	
+	public String getDatabaseName() 
+	{
+		return databaseName;
+	}
+
+	public void setDatabaseName(String databaseName) 
+	{
+		this.databaseName = databaseName;
+	}
 
 	public String getPassword() 
 	{
@@ -216,6 +225,44 @@ public class Schema implements Serializable
 	public void setId(long id)
 	{
 		this.id = id;
+	}
+	
+	public Set<Table> getTables()
+	{
+		if (tables == null)
+			loadTables();
+		return Collections.unmodifiableSet(tables);
+	}
+	
+	public void addTable(Table table)
+	{
+		tables.add(table);
+	}
+	
+	private void loadTables()
+	{
+		tables = Table.getTables(this);
+	}
+	
+	Connection getConnection()
+	{
+		return connection;
+	}
+	
+	public Set<Cube> getCubes()
+	{
+		return cubes;
+	}
+	
+	public void setCubes(Set<Cube> cubes)
+	{
+		this.cubes = cubes;
+	}
+	
+	public void addCube(Cube cube)
+	{
+		this.cubes.add(cube);
+		cube.setSchema(this);
 	}
 	
 }

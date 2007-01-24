@@ -20,7 +20,7 @@
 		</property>
 		
 		<many-to-one name="schema" column="schemacode" 
-			class="Schema" not-null="true" cascade="save-update"/>
+			class="Schema" not-null="true"/>
 	</class>
 
 </hibernate-mapping>

@@ -15,6 +15,10 @@
 			<column name="name" not-null="true"/>
 		</property>
 		
+		<property name="databaseName">
+			<column name="databasename" not-null="true"/>
+		</property>
+		
 		<property name="user">
 			<column name="username" not-null="true"/>
 		</property>
@@ -30,6 +34,11 @@
 		<set name="maps" inverse="true" cascade="all">
 			<key column="schemacode"/>
 			<one-to-many class="Mapa"/>
+		</set>
+		
+		<set name="cubes" inverse="true" cascade="all">
+			<key column="schemacode"/>
+			<one-to-many class="Cube"/>
 		</set>
 		
 	</class>

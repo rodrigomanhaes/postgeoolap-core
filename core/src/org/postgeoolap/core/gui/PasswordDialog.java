@@ -9,8 +9,9 @@ import java.util.Arrays;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 
+import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.gui.auxiliary.OkCancelDialog;
-import org.postgeoolap.core.util.SwingUtils;
+import org.postgeoolap.core.i18n.Local;
 
 @SuppressWarnings("serial")
 public class PasswordDialog extends OkCancelDialog 
@@ -20,11 +21,12 @@ public class PasswordDialog extends OkCancelDialog
 	
 	public PasswordDialog()
 	{
-		super("Enter password");
+		super(Local.getString("title.enter_password"));
 		this.init();
 		this.build();
 		this.setAutoClose(false);
 		this.pack();
+		SwingUtils.centralize(this);
 	}
 	
 	private void init()
@@ -37,9 +39,9 @@ public class PasswordDialog extends OkCancelDialog
 	{
 		panel.setLayout(new GridBagLayout());
 		
-		SwingUtils.addGridBagLabelTextField(panel, "Password", password, 
+		SwingUtils.addGridBagLabelTextField(panel, Local.getString("label.password"), password, 
 			0, 0, 1, 1, 1, GridBagConstraints.NONE, new Insets(3, 3, 3, 3));
-		SwingUtils.addGridBagLabelTextField(panel, "Confirm", confirm, 
+		SwingUtils.addGridBagLabelTextField(panel, Local.getString("label.confirm"), confirm, 
 			0, 1, 1, 1, 1, GridBagConstraints.NONE);
 	}
 	
@@ -47,7 +49,7 @@ public class PasswordDialog extends OkCancelDialog
 	{
 		if (!Arrays.equals(password.getPassword(), confirm.getPassword()))
 		{
-			JOptionPane.showMessageDialog(null, "Password does not match confirmation");
+			JOptionPane.showMessageDialog(null, Local.getString("message.confirmation_not_match"));
 			confirm.grabFocus();
 		}
 		else
@@ -56,7 +58,7 @@ public class PasswordDialog extends OkCancelDialog
 
 	public void cancelAction(ActionEvent e) 
 	{
-		
+		this.setVisible(false);
 	}
 	
 	public char[] getPassword()

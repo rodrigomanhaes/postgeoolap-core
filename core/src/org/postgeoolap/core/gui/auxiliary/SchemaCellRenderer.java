@@ -9,9 +9,10 @@ import javax.swing.ListCellRenderer;
 
 import org.postgeoolap.core.resources.ResourceBox;
 
-@SuppressWarnings("serial")
 public class SchemaCellRenderer extends JLabel implements ListCellRenderer 
 {
+	private static final long serialVersionUID = -8345075589218334393L;
+	
 	private static final Icon icon = ResourceBox.schemaIcon(); 
 	
 	public Component getListCellRendererComponent(JList list, Object value, 

@@ -99,7 +99,7 @@ public class ReflectionUtils
         }
         catch (InstantiationException e)
         {
-            // com um parâmetro false, nunca se cairá num InstantiationException
+            // never happens if autoCreate parameter is false in setNestedProperty 
         }
     }
     
@@ -144,8 +144,7 @@ public class ReflectionUtils
         }
         catch (Exception e)
         {
-            //e.printStackTrace(System.err);
-            throw new IllegalArgumentException(e);
+             throw new IllegalArgumentException(e);
         }
     }
     
@@ -215,5 +214,4 @@ public class ReflectionUtils
         ret += string.substring(1, string.length());
         return ret;
     }
-
 }

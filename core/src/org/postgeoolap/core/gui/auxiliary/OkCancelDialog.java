@@ -10,14 +10,14 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import org.postgeoolap.core.util.SwingUtils;
+import org.postgeoolap.core.i18n.Local;
 
 @SuppressWarnings("serial")
 public abstract class OkCancelDialog extends JDialog 
 {
 	protected JPanel panel;
-	private JButton ok;
-	private JButton cancel;
+	protected JButton ok;
+	protected JButton cancel;
 	
 	private boolean okFlag;
 	private boolean autoClose;
@@ -31,13 +31,11 @@ public abstract class OkCancelDialog extends JDialog
 		this.setTitle(title);
 		
 		this.panel = new JPanel();
-		ok = new JButton("Ok");
-		cancel = new JButton("Cancel");
+		ok = new JButton(Local.getString("command.ok"));
+		cancel = new JButton(Local.getString("command.cancel"));
 		
 		this.build();
 		this.setModal(true);
-		this.pack();
-		SwingUtils.centralize(this);
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setResizable(false);
 		
@@ -121,4 +119,14 @@ public abstract class OkCancelDialog extends JDialog
 	
 	public abstract void okAction(ActionEvent e);
 	public abstract void cancelAction(ActionEvent e);
+	
+	protected void setOkText(String ok)
+	{
+		this.ok.setText(ok);
+	}
+	
+	protected void setCancelText(String cancel)
+	{
+		this.cancel.setText(cancel);
+	}
 }

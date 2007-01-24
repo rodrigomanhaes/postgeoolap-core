@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.model.Mapa;
 
 @SuppressWarnings("serial")
@@ -22,10 +23,31 @@ public class MapTableModel extends AbstractTableModel
 		this.maps = new ArrayList<Mapa>(Arrays.asList(maps));
 	}
 	
-	public void addMap(Mapa mapa)
+	public boolean addMap(Mapa mapa)
 	{
-		maps.add(mapa);
-		this.fireTableRowsInserted(maps.size() - 1, maps.size() - 1);
+		if (!exist(mapa))
+		{
+			maps.add(mapa);
+			this.fireTableRowsInserted(maps.size() - 1, maps.size() - 1);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean exist(Mapa mapa)
+	{
+		for (Mapa map: maps)
+			if (map.getName().equals(mapa.getName()))
+				return true;
+		return false;
+	}
+	
+	public boolean exist(String name)
+	{
+		for (Mapa map: maps)
+			if (map.getName().equals(name))
+				return true;
+		return false;
 	}
 	
 	public void addMaps(Mapa[] maps)
@@ -52,9 +74,9 @@ public class MapTableModel extends AbstractTableModel
 		switch (columnIndex)
 		{
 			case 0:
-				return "Map name";
+				return Local.getString("label.map_name");
 			case 1:
-				return "SRID";
+				return Local.getString("label.srid");
 			default:
 				return null;
 		}

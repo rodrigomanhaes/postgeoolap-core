@@ -12,11 +12,13 @@ import static org.postgeoolap.core.metadata.MetadataDDL.MAP;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.postgeoolap.core.i18n.Local;
 
 public class MetadataHandler 
 {
@@ -57,21 +59,23 @@ public class MetadataHandler
 			try
 			{
 				Statement statement = connection.createStatement();
-				log.info("Creating " + ddl.name() + " table");
+				log.info(MessageFormat.format(Local.getString("message.creating_table"),
+					ddl.name()));
 				statement.execute(ddl.createTable());
-				log.info(ddl.name() + " table created");
+				log.info(MessageFormat.format(Local.getString("message.table_created"),
+					ddl.name()));
 			}
 			catch (SQLException e)
 			{
 				log.error(e.getMessage(), e);
-				throw new MetadataException("Error on creating tables" , e);
+				throw new MetadataException(Local.getString("error.creating_table") , e);
 			}
 		}
 		
 		return true;		
 	}
 	
-	public boolean dropTables() throws MetadataException
+	public boolean dropTables()
 	{
 		Connection connection = MetadataConnection.connection();
 		
@@ -82,13 +86,14 @@ public class MetadataHandler
 			{
 				Statement statement = connection.createStatement();
 				statement.execute(ddl.dropTable());
-				log.info(ddl.name() + " table dropped");
+				log.info(MessageFormat.format(Local.getString("message.table_dropped"), 
+					ddl.name()));
 			}
 			catch (SQLException e)
 			{
-				String message = "Can't drop " + ddl.name();
+				String message = MessageFormat.format(
+					Local.getString("error.cannot_drop_table"), ddl.name());
 				log.error(message + ": " + e.getMessage());
-				throw new MetadataException(message , e);
 			}
 		}
 		return true;
@@ -107,13 +112,14 @@ public class MetadataHandler
 		{
 			Statement statement = connection.createStatement();
 			statement.execute(sql);
-			log.info("Empty cubes removed");
+			log.info(Local.getString("message.empty_cubes_deleted"));
 			return true;
 		}
 		catch (SQLException e)
 		{
-			log.error("Error on removing empty cubes: " + e.getMessage());
-			throw new MetadataException("Error on removing empty cubes", e);
+			String msg = Local.getString("error.deleting_empty_cubes");
+			log.error(msg + ": " + e.getMessage());
+			throw new MetadataException(msg, e);
 		}
 	}
 	
@@ -123,24 +129,42 @@ public class MetadataHandler
 		try
 		{
 			Statement statement = connection.createStatement();
-			log.info("Start cleaning all cubes...");
+			log.info(Local.getString("message.start_delete_cubes"));
 			statement.execute("DELETE FROM aggregationitem");
-			log.info("AGGREGATIONITEM clean");
+			String deleted = Local.getString("message.clean");
+			log.info(MessageFormat.format(deleted, "AGGREGATIONITEM"));
 			statement.execute("DELETE FROM aggregation");
-			log.info("AGGREGATION clean");
+			log.info(MessageFormat.format(deleted, "AGGREGATION"));
 			statement.execute("DELETE FROM attribute");
-			log.info("ATTRIBUTE clean");
+			log.info(MessageFormat.format(deleted, "ATTRIBUTE"));
 			statement.execute("DELETE FROM dimension");
-			log.info("DIMENSION clean");
+			log.info(MessageFormat.format(deleted, "DIMENSION"));
 			statement.execute("DELETE FROM cube");
-			log.info("CUBE clean");
+			log.info(MessageFormat.format(deleted, "CUBE"));
 			return true;
 		}
 		catch (SQLException e)
 		{
-			log.error("Error on removing cubes: " + e.getMessage());
-			throw new MetadataException("Error on removing cubes", e); 
+			String msg = Local.getString("error.deleting_cubes");
+			log.error(msg + ": " + e.getMessage());
+			throw new MetadataException(msg, e); 
 		}
 	}
-
+	
+	public void execute(String sql) throws MetadataException
+	{
+		Connection connection = MetadataConnection.connection();
+		try
+		{
+			Statement statement = connection.createStatement();
+			statement.execute(sql);
+			log.info(Local.getString("message.submit_command"));
+		}
+		catch (SQLException e)
+		{
+			String msg = Local.getString("error.submit_command");
+			log.error(msg, e);
+			throw new MetadataException(msg, e);
+		}		
+	}
 }

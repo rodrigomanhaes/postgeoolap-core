@@ -22,11 +22,11 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.gui.auxiliary.SchemaCellRenderer;
 import org.postgeoolap.core.gui.auxiliary.UpdatableListModel;
 import org.postgeoolap.core.model.Schema;
 import org.postgeoolap.core.model.exception.ModelException;
-import org.postgeoolap.core.util.SwingUtils;
 
 @SuppressWarnings("serial")
 public class SchemaSelectionDialog extends JDialog
@@ -202,7 +202,7 @@ public class SchemaSelectionDialog extends JDialog
 	
 	private void newSchema()
 	{
-		SchemaDialog schemaDialog = new SchemaDialog("Schema");
+		SchemaDialog schemaDialog = new SchemaDialog();
 		schemaDialog.setVisible(true);
 		if (schemaDialog.isOk())
 			((DefaultListModel) list.getModel()).addElement(schemaDialog.getSchema());
@@ -212,7 +212,7 @@ public class SchemaSelectionDialog extends JDialog
 	{
 		if (list.getSelectedIndex() != -1)
 		{
-			SchemaDialog schemaDialog = new SchemaDialog("Schema", schema);
+			SchemaDialog schemaDialog = new SchemaDialog(schema);
 			schemaDialog.setVisible(true);
 			if (schemaDialog.isOk())
 				((UpdatableListModel) list.getModel()).update();
