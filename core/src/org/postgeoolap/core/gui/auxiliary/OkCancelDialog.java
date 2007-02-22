@@ -12,7 +12,6 @@ import javax.swing.WindowConstants;
 
 import org.postgeoolap.core.i18n.Local;
 
-@SuppressWarnings("serial")
 public abstract class OkCancelDialog extends JDialog 
 {
 	protected JPanel panel;

@@ -1,5 +1,8 @@
 package org.postgeoolap.core.gui;
 
+import goitaca.model.UpdatableListModel;
+import goitaca.utils.SwingUtils;
+
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -21,8 +24,6 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.goitaca.model.UpdatableListModel;
-import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.CoreManager;
 import org.postgeoolap.core.gui.auxiliary.SchemaCellRenderer;
 import org.postgeoolap.core.i18n.Local;
@@ -211,6 +212,8 @@ public class SelectSchemaDialog extends JDialog
 		catch (ModelException e)
 		{
 			JOptionPane.showMessageDialog(null, e.getMessage());
+			this.setVisible(false);
+			this.dispose();
 		}
 	}
 	
@@ -226,7 +229,7 @@ public class SelectSchemaDialog extends JDialog
 	{
 		if (list.getSelectedIndex() != -1)
 		{
-			SchemaDialog schemaDialog = new SchemaDialog(schema);
+			SchemaDialog schemaDialog = new SchemaDialog(Local.getString("label.schema"), schema);
 			schemaDialog.setVisible(true);
 			if (schemaDialog.isOk())
 				((UpdatableListModel) list.getModel()).update();

@@ -1,5 +1,7 @@
 package org.postgeoolap.core.gui;
 
+import goitaca.utils.SwingUtils;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -20,7 +22,6 @@ import javax.swing.JTextField;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.gui.auxiliary.MapFileFilter;
 import org.postgeoolap.core.gui.auxiliary.MapTableModel;
 import org.postgeoolap.core.gui.auxiliary.OkCancelDialog;
@@ -46,12 +47,12 @@ public class SchemaDialog extends OkCancelDialog
 	
 	public SchemaDialog()
 	{
-		this(null);
+		this(Local.getString("title.schema"), null);
 	}
 	
-	public SchemaDialog(Schema schema)
+	public SchemaDialog(String title, Schema schema)
 	{
-		super(Local.getString("title.schema"));
+		super(title);
 		init();
 		build();
 		pack();

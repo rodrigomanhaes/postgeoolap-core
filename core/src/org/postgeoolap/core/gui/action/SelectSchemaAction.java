@@ -1,8 +1,9 @@
 package org.postgeoolap.core.gui.action;
 
+import goitaca.action.CommandAction;
+
 import java.awt.event.ActionEvent;
 
-import org.goitaca.action.CommandAction;
 import org.postgeoolap.core.CoreManager;
 import org.postgeoolap.core.gui.SelectSchemaDialog;
 import org.postgeoolap.core.i18n.Local;

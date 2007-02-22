@@ -1,5 +1,9 @@
 package org.postgeoolap.core.gui;
 
+import goitaca.event.TextComponentDontType;
+import goitaca.factory.FormattedTextFactory;
+import goitaca.utils.SwingUtils;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -7,13 +11,11 @@ import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.text.MessageFormat;
 
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import org.goitaca.event.TextComponentDontType;
-import org.goitaca.factory.FormattedTextFactory;
-import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.gui.auxiliary.OkCancelDialog;
 import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.model.Cube;
@@ -28,7 +30,7 @@ public class CreateCubeDialog extends OkCancelDialog
 	
 	private JTextField schemaName;
 	private JTextField name;
-	private JTextField minimumAggregation;
+	private JFormattedTextField minimumAggregation;
 	
 	public CreateCubeDialog(Schema schema) 
 	{
@@ -114,7 +116,12 @@ public class CreateCubeDialog extends OkCancelDialog
 			return;
 		}
 
-		cube.setMinimumAggregation(Integer.parseInt(minimumAggregation.getText()));
+		String s = minimumAggregation.getText();
+		StringBuilder sb = new StringBuilder();
+		for (int i = s.length() - 1; i >= 0; i--)
+			if (Character.isDigit(s.charAt(i)))
+				sb.append(s.charAt(i));
+		cube.setMinimumAggregation(new Long(sb.toString()));
 		cube.setName(name.getText());
 		schema.addCube(cube);
 		try

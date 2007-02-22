@@ -92,6 +92,8 @@ public class Aggregation implements Serializable
 		
 		aggregation.persist();
 		
+		cube.addAggregation(aggregation);
+		
 		return aggregation;
 	}
 	
@@ -115,14 +117,14 @@ public class Aggregation implements Serializable
 				aggregableCount++;
 		}
 			
-		sql.append(") SELECT ");
+		sql.append(") (SELECT ");
 			
 		boolean first = true;
 		
 		for (Attribute attribute: attributeSet)
 		{
 			String attributeName =
-				reference.isBase() ? attribute.getDimension().getTableName() : reference.getName() + 
+				(reference.isBase() ? attribute.getDimension().getTableName() : reference.getName()) + 
 				"." + attribute.getPhysicalName();
 			
 			if (!AggregationType.NON_AGGREGABLE.equals(attribute.getAggregationType()))
@@ -153,22 +155,25 @@ public class Aggregation implements Serializable
 				sql.append(dimension.getTableName());
 			}
 			
-			int nonFactDimensionCount = dimensions.size() - 1;
+			int nonFactDimensionCount = dimensions.size();
 			if (nonFactDimensionCount > 0)
 			{
 				sql.append(" WHERE ");
 				first = true;
 				for (Dimension dimension: dimensions)
 				{
+					if (!dimension.isType(DimensionType.DIMENSION))
+						continue;
 					if (!first)
 						sql.append(" AND ");
 					else
 						first = false;
+					
 					sql.append(dimension.getClause());
 				}
 			}
 			
-			sql = new StringBuilder(sql.substring(0, sql.length() - 9));
+			//sql = new StringBuilder(sql.substring(0, sql.length() - 9));
 			
 			// GROUP BY
 			if (aggregableCount > 0)
@@ -182,7 +187,7 @@ public class Aggregation implements Serializable
 						String attributeName = reference.isBase() ?
 							attribute.getDimension().getTableName() + "." + attribute.getPhysicalName() :
 							reference.getName() + "." + attribute.getPhysicalName();
-						if (first)
+						if (!first)
 							sql.append(", ");
 						else
 							first = false;
@@ -215,7 +220,7 @@ public class Aggregation implements Serializable
 	 */
 	public void createIndices() throws ModelException
 	{
-		boolean combinedIndices = false; /* TODO move this for configurations */
+		boolean combinedIndices = false; /* TODO this must be configured */
 		
 		JDBCHandler handler = JDBCHandler.instance(CoreManager.instance().getActiveSchema().getConnection());
 		
@@ -387,7 +392,8 @@ public class Aggregation implements Serializable
 				sql.append("', '");
 				sql.append(attribute.getPhysicalName());
 				sql.append("', '");
-				if (this.getCube().getSchema().getMaps().iterator().next() != null)
+				if (this.getCube().getSchema().getMaps() != null && 
+					this.getCube().getSchema().getMaps().size() > 0)
 					sql.append(this.getCube().getSchema().getMaps().iterator().next().getSrid());
 				else
 					sql.append(-1);
@@ -496,5 +502,10 @@ public class Aggregation implements Serializable
 	public void setSqlBase(String sqlBase) {
 		this.sqlBase = sqlBase;
 	}
-		
+	
+	@Override
+	public String toString()
+	{
+		return name;
+	}
 }

@@ -1,5 +1,9 @@
 package org.postgeoolap.core.gui;
 
+import goitaca.event.TextComponentDontType;
+import goitaca.renderer.table.FixedTableCellRenderer;
+import goitaca.utils.SwingUtils;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -11,9 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import org.goitaca.event.TextComponentDontType;
-import org.goitaca.renderer.FixedTableCellRenderer;
-import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.gui.auxiliary.AttributeNameTableModel;
 import org.postgeoolap.core.gui.auxiliary.OkCancelDialog;
 import org.postgeoolap.core.i18n.Local;

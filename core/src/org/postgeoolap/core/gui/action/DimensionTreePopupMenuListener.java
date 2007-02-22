@@ -9,15 +9,15 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import org.postgeoolap.core.model.Cube;
+import org.postgeoolap.core.model.Attribute;
 
-public class SchemaTreePopupMenuListener implements PopupMenuListener 
+public class DimensionTreePopupMenuListener implements PopupMenuListener 
 {
 	private JPopupMenu menu;
 	private JTree tree;
 	private Map<ActionManager, JMenuItem> map;
 	
-	public SchemaTreePopupMenuListener(JPopupMenu menu, JTree tree, 
+	public DimensionTreePopupMenuListener(JPopupMenu menu, JTree tree, 
 		Map<ActionManager, JMenuItem> map)
 	{
 		super();
@@ -25,7 +25,7 @@ public class SchemaTreePopupMenuListener implements PopupMenuListener
 		this.tree = tree;
 		this.map = map;
 	}
-
+	
 	public void popupMenuWillBecomeVisible(PopupMenuEvent e) 
 	{
 		menu.removeAll();
@@ -34,30 +34,17 @@ public class SchemaTreePopupMenuListener implements PopupMenuListener
 			return;
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) component;
 		Object object = node.getUserObject();
-		if (object.getClass().equals(Cube.class))
-		{
-			Cube cube = (Cube) object;
-			if (!cube.hasDimensions())
-				menu.add(map.get(ActionManager.DEFINE_FACT_TABLE));
-			else
-			{
-				menu.add(map.get(ActionManager.ADD_DIMENSION));
-				menu.add(map.get(ActionManager.ADD_NON_AGGREGABLE_DIMENSION));
-				if (cube.dimensionCount() > 2)
-					menu.add(map.get(ActionManager.PROCESS_CUBE));
-				if (cube.wasProcessed())
-					menu.add(map.get(ActionManager.ANALYZE_CUBE));
-					
-			}
-		}
+		if (object.getClass().equals(Attribute.class))
+			menu.add(map.get(ActionManager.DEFINE_CRITERION));
 	}
 
 	public void popupMenuWillBecomeInvisible(PopupMenuEvent e) 
 	{
+			
 	}
 
 	public void popupMenuCanceled(PopupMenuEvent e) 
 	{
+			
 	}
-
 }

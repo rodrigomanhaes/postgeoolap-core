@@ -3,7 +3,10 @@ package org.postgeoolap.core.model;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -161,6 +164,11 @@ public class Dimension implements Serializable
 		attributes.add(attribute);
 		attribute.setDimension(this);
 	}
+	
+	public boolean isType(DimensionType type)
+	{
+		return type.equals(this.getType());
+	}
 
 	/* persistence */
 	public void persist() throws ModelException
@@ -302,6 +310,7 @@ public class Dimension implements Serializable
 				dimension.setTableId(result.getLong("tablecode"));
 				dimension.setTableName(result.getString("tablename"));
 				dimension.setClause(result.getString("clause"));
+				dimension.setInternalType(result.getString("dimensiontype").charAt(0));
 				
 				set.add(dimension);
 			}
@@ -322,5 +331,81 @@ public class Dimension implements Serializable
 			}
 		}
 		return set;
+	}
+	
+	public void setClauseWithFactDimension(Dimension factDimension) throws ModelException
+	{
+		// search for the keys to related fields
+		String sql = 
+			"SELECT conkey[1] AS factAttributeCode, confkey[1] AS dimensionAttributeCode " +
+			"  FROM pg_constraint " +
+			"  WHERE conrelid = ? AND confrelid = ? AND contype = 'f'";
+		
+		JDBCHandler handler = JDBCHandler.instance(this.getCube().getSchema().getConnection());
+		
+		try
+		{
+			ResultSet result = handler.submitQuery(sql, 
+				factDimension.getTableId(), this.getTableId());
+			
+			if (!result.next())
+				throwConstraintsModelException();
+			String factAttributeCode = result.getString("factAttributeCode");
+			String dimensionAttributeCode = result.getString("dimensionAttributeCode");
+			result.close();
+			
+			sql = "SELECT attname AS factAttributeName FROM pg_attribute " +
+				  "  WHERE attrelid = ? AND attnum = ?";
+			result = handler.submitQuery(sql, factDimension.getTableId(), factAttributeCode);
+			if (!result.next())
+				throwConstraintsModelException();
+			String factAttributeName = result.getString("factAttributeName");
+			result.close();
+			
+			sql = "SELECT attname AS dimensionAttributeName FROM pg_attribute " +
+				  "  WHERE attrelid = ? AND attnum = ?";
+			result = handler.submitQuery(sql, this.getTableId(), dimensionAttributeCode);
+			if (!result.next())
+				throwConstraintsModelException();
+			String dimensionAttributeName = result.getString("dimensionAttributeName");
+			result.close();
+			
+			this.setClause(
+				new StringBuilder()
+					.append(factDimension.getTableName())
+					.append(".")
+					.append(factAttributeName)
+					.append(" = ")
+					.append(this.getTableName())
+					.append(".")
+					.append(dimensionAttributeName)
+					.toString()
+			);
+		}
+		catch (SQLException e)
+		{
+			log.error(e.getMessage(), e);
+			throw new ModelException(e);
+		}
+	}
+	
+	private void throwConstraintsModelException() throws ModelException 
+	{
+		String msg = MessageFormat.format(Local.getString("error.check_dw_constraints"), 
+			this.getTableName());
+		log.error(msg);
+		throw new ModelException(msg);
+	}
+	
+	public List<Attribute> getHierarchy() throws ModelException
+	{
+		List<Attribute> list = new ArrayList<Attribute>();
+		for (int level = Cube.MOST_AGGREGATED_LEVEL; level > 0; level--)
+		{
+			Attribute attribute = Attribute.getStandard(this, level);
+			if (attribute != null)
+				list.add(attribute);
+		}
+		return list;
 	}
 }

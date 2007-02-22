@@ -2,9 +2,6 @@
 - hibernate: varchar p/ char[] em Schema.password
 - não permitir duas instâncias do PostGeoOlap
 
-- ao criar as tabelas de agregação, remover todos os espaços, lowcasear, remover números do início e
-  remover quaisquer caracteres especiais
-- substituir Attribute.aggregationType de char para enum
 - criar uma associação 1:n entre Table e Dimension e entre Field e Attribute (mapeamento Hibernate); 
 atualizar Jude e dissertação
 - acertar menus para qualquer situação

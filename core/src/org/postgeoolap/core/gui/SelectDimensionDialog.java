@@ -1,5 +1,8 @@
 package org.postgeoolap.core.gui;
 
+import goitaca.renderer.list.IconListCellRenderer;
+import goitaca.utils.SwingUtils;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -15,8 +18,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.goitaca.renderer.IconListCellRenderer;
-import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.gui.auxiliary.OkCancelDialog;
 import org.postgeoolap.core.gui.auxiliary.TableListModel;
 import org.postgeoolap.core.i18n.Local;
@@ -38,11 +39,25 @@ public class SelectDimensionDialog extends OkCancelDialog
 	private JList tableList;
 	private JList fieldList;
 	private Cube cube;
+	private boolean many;
 	
-	public SelectDimensionDialog(Cube cube) 
+	private DimensionType dimensionType;
+
+	/**
+	 * 
+	 * @param cube
+	 * @param dimensionDescription to be placed on window's title bar
+	 * @param dimensionType 
+	 * @param many true if many dimensions can be selected
+	 */
+	public SelectDimensionDialog(Cube cube, String dimensionDescription, 
+		DimensionType dimensionType, boolean many) 
 	{
-		super(Local.getString("title.select_dimension"));
+		super(MessageFormat.format(
+			Local.getString("title.select_something"), dimensionDescription));
 		this.cube = cube;
+		this.dimensionType = dimensionType;
+		this.many = many;
 		
 		this.init();
 		this.build();
@@ -53,7 +68,7 @@ public class SelectDimensionDialog extends OkCancelDialog
 	private void init()
 	{
 		tableList = new JList();
-		tableList.setModel(new TableListModel(cube.getSchema()));
+		tableList.setModel(new TableListModel(cube));
 		tableList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		tableList.addListSelectionListener(
 			new ListSelectionListener()
@@ -83,7 +98,6 @@ public class SelectDimensionDialog extends OkCancelDialog
 			model.addElement(field);
 	}
 	
-	
 	private void build()
 	{
 		panel.setLayout(new GridBagLayout());
@@ -104,6 +118,21 @@ public class SelectDimensionDialog extends OkCancelDialog
 		{
 			Table table = (Table) object;
 			Dimension dimension = new Dimension();
+			dimension.setType(this.dimensionType);
+			dimension.setTableId(table.getId());
+			dimension.setTableName(table.getName());
+			
+			try
+			{
+				cube.addDimension(dimension);
+			}
+			catch (ModelException exception)
+			{
+				JOptionPane.showMessageDialog(null, exception.getMessage(), 
+					Local.getString("title.dimension"), JOptionPane.ERROR_MESSAGE);
+				System.exit(0);
+			}
+			
 			String name = JOptionPane.showInputDialog(MessageFormat.format(
 				Local.getString("label.enter_dimension_name"), table.getName()),
 				table.getName());
@@ -115,9 +144,6 @@ public class SelectDimensionDialog extends OkCancelDialog
 					break;
 			}
 			dimension.setName(name);
-			dimension.setType(DimensionType.DIMENSION);
-			dimension.setTableId(table.getId());
-			dimension.setTableName(table.getName());
 			
 			// build attributes
 			for (Field field: table.getFields())
@@ -137,30 +163,33 @@ public class SelectDimensionDialog extends OkCancelDialog
 			dialog.setVisible(true);
 			if (!dialog.isOk())
 			{
-				if (verifyContinue(table))
+				if (many && verifyContinue(table))
 					continue;
 				else
 					break;
 			}
 			
-			dialog = new DimensionHierarchyDialog(dimension);
-			dialog.setVisible(true);
-			if (!dialog.isOk())
+			if (!DimensionType.NON_AGGREGABLE.equals(dimensionType))
 			{
-				if (verifyContinue(table))
-					continue;
-				else
-					break;
+				dialog = new DimensionHierarchyDialog(dimension);
+				dialog.setVisible(true);
+				if (!dialog.isOk())
+				{
+					if (many && verifyContinue(table))
+						continue;
+					else
+						break;
+				}
 			}
 			
-			cube.addDimension(dimension);
 			try
 			{
 				dimension.persist();
 			}
 			catch (ModelException exception)
 			{
-				JOptionPane.showMessageDialog(null, exception.getMessage());
+				JOptionPane.showMessageDialog(null, exception.getMessage(), 
+					Local.getString("title.dimension"), JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}

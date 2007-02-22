@@ -1,5 +1,10 @@
 package org.postgeoolap.core.gui;
 
+import goitaca.action.CommandAction;
+import goitaca.action.CommandActionAdapter;
+import goitaca.action.MenuBarTool;
+import goitaca.utils.SwingUtils;
+
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -11,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -22,20 +28,17 @@ import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import org.goitaca.action.CommandAction;
-import org.goitaca.action.CommandActionAdapter;
-import org.goitaca.action.MenuBarTool;
-import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.CoreManager;
 import org.postgeoolap.core.gui.action.ActionManager;
 import org.postgeoolap.core.gui.action.SchemaTreePopupMenuListener;
 import org.postgeoolap.core.gui.auxiliary.OkCancelDialog;
 import org.postgeoolap.core.gui.auxiliary.SchemaTreeCellRenderer;
-import org.postgeoolap.core.gui.auxiliary.SchemaTreeRootNode;
+import org.postgeoolap.core.gui.auxiliary.SchemaRootNode;
 import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.metadata.MetadataException;
 import org.postgeoolap.core.metadata.MetadataHandler;
 import org.postgeoolap.core.model.Cube;
+import org.postgeoolap.core.model.DimensionType;
 import org.postgeoolap.core.model.Schema;
 
 public class MainFrame extends JFrame 
@@ -43,11 +46,7 @@ public class MainFrame extends JFrame
 	private static final long serialVersionUID = 2394898615429334095L;
 	
 	private JMenuBar mainMenu;
-	@SuppressWarnings("unused")
-	private JMenuItem selectSchema;
 	private JMenuItem createCube;
-	@SuppressWarnings("unused")
-	private JMenuItem createMetadata;
 	private Object chosen;
 	
 	private JTree schemaTree;
@@ -67,7 +66,6 @@ public class MainFrame extends JFrame
 		SwingUtils.centralize(this);
 	}
 	
-	@SuppressWarnings("serial")
 	public void init()
 	{
 		mainMenu = new JMenuBar();
@@ -82,6 +80,8 @@ public class MainFrame extends JFrame
 							Local.getString("shortcut.schema|select"), 
 							Local.getString("tip.select_schema"))
 						{
+							private static final long serialVersionUID = 2577022656608321851L;
+
 							public void actionPerformed(ActionEvent e)
 							{
 								selectSchema();
@@ -91,6 +91,8 @@ public class MainFrame extends JFrame
 							Local.getString("shortcut.schema|create_cube"), 
 							Local.getString("tip.create_cube"))
 						{
+							private static final long serialVersionUID = -4444429176674355968L;
+
 							public void actionPerformed(ActionEvent e)
 							{
 								createCube();
@@ -99,7 +101,6 @@ public class MainFrame extends JFrame
 		           }
 			);
 		
-		selectSchema = menu.getItem(0);
 		createCube = menu.getItem(1);
 		createCube.setEnabled(false);
 		
@@ -115,6 +116,8 @@ public class MainFrame extends JFrame
 							Local.getString("shortcut.metadata|create"), 
 							Local.getString("tip.create_metadata"))
 						{
+							private static final long serialVersionUID = -8654040561951923511L;
+
 							public void actionPerformed(ActionEvent e)
 							{
 								createMetadata();
@@ -124,6 +127,8 @@ public class MainFrame extends JFrame
 							Local.getString("shortcut.metadata|delete_cubes"), 
 							Local.getString("tip.delete_cubes"))
 						{
+							private static final long serialVersionUID = -8179319899966397012L;
+
 							public void actionPerformed(ActionEvent e)
 							{
 								createMetadata();
@@ -132,7 +137,6 @@ public class MainFrame extends JFrame
 		           }
 			);
 		
-		createMetadata = menu.getItem(0);
 		mainMenu.add(menu);
 		
 		Map<ActionManager, JMenuItem> map = new HashMap<ActionManager, JMenuItem>();
@@ -160,6 +164,19 @@ public class MainFrame extends JFrame
 		);
 		map.put(ActionManager.ADD_DIMENSION, addDimension);
 		
+		JMenuItem addNonAggregableDimension = new JMenuItem(
+			Local.getString("command.add_non_aggregable_dimension"));
+		addNonAggregableDimension.addActionListener(
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e) 
+				{
+					addNonAggregableDimension();
+				}
+			}
+		);
+		map.put(ActionManager.ADD_NON_AGGREGABLE_DIMENSION, addNonAggregableDimension);
+		
 		JMenuItem processCube = new JMenuItem(Local.getString("command.process_cube"));		
 		processCube.addActionListener(
 			new ActionListener()
@@ -172,6 +189,19 @@ public class MainFrame extends JFrame
 		);
 		map.put(ActionManager.PROCESS_CUBE, processCube);
 		
+		
+		JMenuItem analyzeCube = new JMenuItem(Local.getString("command.analyze_cube"));		
+		analyzeCube.addActionListener(
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					analyzeCube();
+				}
+			}
+		);
+		map.put(ActionManager.ANALYZE_CUBE, analyzeCube);
+
 		final JPopupMenu popup = new JPopupMenu();
 		
 		schemaTree = new JTree(new Object[] {});
@@ -212,7 +242,7 @@ public class MainFrame extends JFrame
 	{
 		((DefaultTreeModel) schemaTree.getModel()).setRoot(null);
 		((DefaultTreeModel) schemaTree.getModel()).setRoot(
-			new SchemaTreeRootNode(CoreManager.instance().getActiveSchema()));
+			new SchemaRootNode(CoreManager.instance().getActiveSchema()));
 		schemaTree.repaint();
 	}
 	
@@ -226,7 +256,7 @@ public class MainFrame extends JFrame
 			this.setTitle(appName + " - [" + schema.getName() + "]");
 			createCube.setEnabled(true);
 			((DefaultTreeModel) schemaTree.getModel()).setRoot(
-				new SchemaTreeRootNode(schema));
+				new SchemaRootNode(schema));
 			schemaTree.setRootVisible(true);
 		}
 		else
@@ -266,7 +296,18 @@ public class MainFrame extends JFrame
 	
 	private void addDimension()
 	{
-		OkCancelDialog dialog = new SelectDimensionDialog((Cube) chosen);
+		OkCancelDialog dialog = new SelectDimensionDialog((Cube) chosen, 
+			Local.getString("label.dimension"), DimensionType.DIMENSION, true);
+		dialog.setVisible(true);
+		if (dialog.isOk())
+			this.refresh();
+	}
+	
+	private void addNonAggregableDimension()
+	{
+		OkCancelDialog dialog = new SelectDimensionDialog((Cube) chosen, 
+			Local.getString("label.non_aggregable_dimension"), 
+			DimensionType.NON_AGGREGABLE, false);
 		dialog.setVisible(true);
 		if (dialog.isOk())
 			this.refresh();
@@ -278,5 +319,11 @@ public class MainFrame extends JFrame
 		dialog.setVisible(true);
 		if (dialog.isOk())
 			this.refresh();
+	}
+	
+	private void analyzeCube()
+	{
+		JDialog dialog = new DataAnalysisDialog((Cube) chosen);
+		dialog.setVisible(true);
 	}
 }

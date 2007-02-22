@@ -45,6 +45,8 @@ public class SchemaTreeCellRenderer extends DefaultTreeCellRenderer
 		else if (object instanceof Cube)
 			this.setIcon(((Cube) object).wasProcessed() ? 
 				ResourceBox.processedCubeIcon() : ResourceBox.cubeIcon());
+		else if (object instanceof Attribute && ((Attribute) object).isGeographical())
+			this.setIcon(ResourceBox.nonAggregableIcon());
 		else
 			this.setIcon(icons.get(object.getClass()));
 		

@@ -1,5 +1,7 @@
 package org.postgeoolap.core.gui;
 
+import goitaca.utils.SwingUtils;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -12,7 +14,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 
-import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.gui.auxiliary.HierarchyTableModel;
 import org.postgeoolap.core.gui.auxiliary.OkCancelDialog;
 import org.postgeoolap.core.i18n.Local;

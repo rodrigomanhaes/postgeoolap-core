@@ -6,7 +6,7 @@ CREATE VIEW cnsaggregation AS
     attribute.physicalname AS attributephysicalname, attribute.level, attribute.standard, 
  	attribute.aggregationtype, attribute.geographic, dimension.dimensioncode,
 	dimension.name AS tablename, dimension.dimensionname as dimensionname, 
-	imension.dimensiontype, dimension.clause, dimension.tablecode
+	dimension.dimensiontype, dimension.clause, dimension.tablecode
    FROM dimension dimension
    JOIN (attribute attribute
        JOIN (aggregation aggregation

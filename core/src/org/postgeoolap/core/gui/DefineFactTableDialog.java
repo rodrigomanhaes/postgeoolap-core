@@ -1,5 +1,8 @@
 package org.postgeoolap.core.gui;
 
+import goitaca.renderer.list.IconListCellRenderer;
+import goitaca.utils.SwingUtils;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -15,8 +18,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.goitaca.renderer.IconListCellRenderer;
-import org.goitaca.utils.SwingUtils;
 import org.postgeoolap.core.gui.auxiliary.OkCancelDialog;
 import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.model.AggregationType;
@@ -145,15 +146,15 @@ public class DefineFactTableDialog extends OkCancelDialog
 			return;
 		}
 		
-		cube.addDimension(fact);
-		
 		try
 		{
+			cube.addDimension(fact);
 			fact.persist();
 		}
 		catch (ModelException exception)
 		{
-			JOptionPane.showMessageDialog(null, exception.getMessage());
+			JOptionPane.showMessageDialog(null, exception.getMessage(), 
+				Local.getString("title.fact_dimension"), JOptionPane.ERROR_MESSAGE);
 		}
 		this.setVisible(false);
 	}
@@ -183,5 +184,6 @@ public class DefineFactTableDialog extends OkCancelDialog
 		model.clear();
 		for (Field field: Utils.sortByStringRepresentation(fields))
 			model.addElement(field);
+		ok.setEnabled(false);
 	}
 }

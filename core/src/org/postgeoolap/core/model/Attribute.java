@@ -1,6 +1,8 @@
 package org.postgeoolap.core.model;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,10 +11,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.type.Type;
+import org.postgeoolap.core.CoreManager;
 import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.model.exception.ModelException;
 import org.postgeoolap.core.orm.HelperException;
 import org.postgeoolap.core.orm.HibernateHelper;
+import org.postgeoolap.core.util.JDBCHandler;
 
 public class Attribute implements Serializable 
 {
@@ -66,6 +70,52 @@ public class Attribute implements Serializable
 		return set;
 	}
 	
+	public Set<Equality> getInstanceSet() throws ModelException
+	{
+		JDBCHandler handler = JDBCHandler.createInstance(CoreManager.instance().getActiveSchema().getConnection());
+		ResultSet result =  handler.submitQuery("SELECT DISTINCT " + this.getPhysicalName() + 
+			" FROM " + this.getDimension().getTableName());
+		Set<Equality> set = new HashSet<Equality>();
+		try
+		{
+			while (result.next())
+				set.add(new Equality(this, result.getObject(1)));
+		}
+		catch (SQLException e)
+		{
+			log.error(e.getMessage(), e);
+			throw new ModelException(e.getMessage(), e);
+		}
+		
+		return set;
+	}
+	
+	public static Attribute getStandard(Dimension dimension, int level)
+		throws ModelException
+	{
+		Set<Attribute> attributes = null;
+		try
+		{
+			attributes = HibernateHelper.get(
+				"from Attribute a where a.dimension = ? and a.standard = ? and a.level = ?",
+				new Object[] {dimension, true, level}, 
+				new Type[] 
+		        { 
+					Hibernate.entity(Dimension.class),
+					Hibernate.BOOLEAN,
+					Hibernate.INTEGER 
+				}
+			);
+		}
+		catch (HelperException e)
+		{
+			throw new ModelException(e.getMessage(), e);
+		}
+		
+		return attributes.size() > 0 ?
+			attributes.iterator().next() : null;
+	}
+	
 	/* Persistence */
 	
 	public void persist() throws ModelException
@@ -90,8 +140,7 @@ public class Attribute implements Serializable
 			throw new ModelException(e.getMessage(), e);
 		}
 	}
-	
-	public void delete() throws ModelException
+		public void delete() throws ModelException
 	{
 		try
 		{
@@ -194,7 +243,8 @@ public class Attribute implements Serializable
 		return standard;
 	}
 
-	public boolean setStandard(boolean standard) {
+	public boolean setStandard(boolean standard) 
+	{
 		if (dimension != null && standard)
 		{
 			Set<Attribute> attributes = dimension.getAttributes();
@@ -210,7 +260,8 @@ public class Attribute implements Serializable
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(String type) 
+	{
 		this.type = type;
 		String upperType = type.toUpperCase();
 		this.geographical = 

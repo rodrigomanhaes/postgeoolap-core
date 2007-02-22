@@ -19,6 +19,10 @@
 			<column name="dimensionType"/>
 		</property>
 		
+		<property name="clause">
+			<column name="clause" not-null="false"/>
+		</property>
+		
 		<property name="tableName">
 			<column name="name" not-null="true" />
 		</property>

@@ -20,7 +20,7 @@
 		</property>
 		
 		<property name="sqlBase">
-			<column name="sqlbase" not-null="true" />
+			<column name="sqlbase" />
 		</property>
 		
 		<property name="order">

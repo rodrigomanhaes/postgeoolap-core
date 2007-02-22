@@ -12,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.type.Type;
-import org.postgeoolap.core.CoreManager;
 import org.postgeoolap.core.i18n.Local;
 import org.postgeoolap.core.model.exception.ModelException;
 import org.postgeoolap.core.orm.HelperException;
@@ -44,7 +43,7 @@ public class Cube implements Serializable
 	
 	public boolean wasProcessed()
 	{
-		return false;
+		return this.getAggregations().size() > 0;
 	}
 	
 	public boolean hasDimensions()
@@ -185,10 +184,13 @@ public class Cube implements Serializable
 		this.dimensions = dimensions;
 	}
 	
-	public void addDimension(Dimension dimension)
+	public void addDimension(Dimension dimension) throws ModelException
 	{
 		dimensions.add(dimension);
 		dimension.setCube(this);
+		if (dimension.isType(DimensionType.DIMENSION))
+			dimension.setClauseWithFactDimension(this.factDimension());
+		log.debug(dimension.getTableName() + ".clause = " + dimension.getClause());
 	}
 	
 	public Set<Aggregation> getAggregations() 
@@ -205,11 +207,6 @@ public class Cube implements Serializable
 	{
 		aggregations.add(aggregation);
 		aggregation.setCube(this);
-	}
-	
-	private void removeAllAggregations()
-	{
-		aggregations.clear();
 	}
 	
 	@Override
@@ -248,11 +245,11 @@ public class Cube implements Serializable
 		{
 			dimension = this.factDimension();
 			tupleCount = JDBCHandler.instance(this.getSchema().getConnection())
-				.askNumber("SELECT COUNT(*) FROM ?", dimension.getTableName());
+				.askNumber("SELECT COUNT(*) FROM " + dimension.getTableName());
 		}
 		else
 			tupleCount = JDBCHandler.instance(this.getSchema().getConnection())
-				.askNumber("SELECT COUNT(*) FROM ?", aggregation.getName());
+				.askNumber("SELECT COUNT(*) FROM " + aggregation.getName());
 		
 		return tupleCount >= this.minimumAggregation ? aggregation : null;
 	}
@@ -292,11 +289,12 @@ public class Cube implements Serializable
 	
 	public void process() throws ModelException
 	{
-		JDBCHandler handler = JDBCHandler.instance(CoreManager.instance().getActiveSchema().getConnection());
+		JDBCHandler handler = JDBCHandler.instance(this.getSchema().getConnection());
 		
 		// 1. deleting preexisting aggregations for this...
 		log.info(Local.getString("message.deleting_aggregations") + "...");
-		this.removeAllAggregations();
+		this.dropAggregations();
+		this.setAggregations(new HashSet<Aggregation>());
 		// ... and saves!
 		try
 		{
@@ -371,15 +369,18 @@ public class Cube implements Serializable
 				
 				if (canProcess)
 				{
-					for (Integer pos: activeStack)
+					for (int i = 0; i < activeStack.size(); i++)
 					{
-						Dimension posDimension = dataDimensions.get(pos);
+						Dimension posDimension = dataDimensions.get(i);
+						int pos = activeStack.get(i);
 						sortingName.append(Integer.toString(pos));
 						Set<Attribute> levelAttributes = posDimension.attributesByLevel(pos);
 						attributeSet.addAll(levelAttributes);
 					}
 					
 					int sorting = Integer.parseInt(sortingName.toString());
+					if (sorting == 0)
+						continue;
 					String aggregationName = this.getPhysicalName() + sortingName;
 					
 					// Checks the need to create current aggregation
@@ -391,7 +392,8 @@ public class Cube implements Serializable
 					
 					if (referenceAggregation != null)
 					{
-						log.info(MessageFormat.format("message.creating_aggregation", 
+						log.info(MessageFormat.format(
+							Local.getString("message.creating_aggregation"), 
 							aggregationName));
 						Aggregation aggregation = new Aggregation();
 						aggregation.setName(aggregationName);
@@ -487,5 +489,13 @@ public class Cube implements Serializable
 		}
 		
 		log.info(Local.getString("message.end_of_cube_processing"));
+	}
+	
+	public void dropAggregations()
+	{
+		JDBCHandler handler = JDBCHandler.instance(this.getSchema().getConnection());
+		for (Table table: schema.getTables())
+			if (table.getName().startsWith(this.getPhysicalName()))
+				handler.submit("DROP TABLE " + table.getName());
 	}
 }

@@ -2,9 +2,9 @@ package org.postgeoolap.core.model.test;
 
 import java.util.Set;
 
-import org.postgeoolap.core.model.Schema;
-
 import junit.framework.TestCase;
+
+import org.postgeoolap.core.model.Schema;
 
 public class SchemaTester extends TestCase 
 {
