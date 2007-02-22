@@ -183,7 +183,7 @@ public class CriteriaDialog extends OkCancelDialog
 			{
 				public Object getData() 
 				{
-					return criteria.getSelectedValues();
+					return criteria.getSelectedValues(); 
 				}
 
 				public JComponent getSource() 
@@ -332,7 +332,7 @@ public class CriteriaDialog extends OkCancelDialog
 		}
 		
 		// checks logical operator if this is not the first criterion
-		if (group.getSelection() == null && addedCriteria.getModel().getSize() > 0)
+		if (group.getSelection() == null && (addedCriteria.getModel().getSize() > 0 || selected.length > 1))
 		{
 			JOptionPane.showMessageDialog(null, 
 				Local.getString("message.criteria_must_have_logical_operator"),
@@ -340,7 +340,7 @@ public class CriteriaDialog extends OkCancelDialog
 			return false;
 		}
 		
-		for (int i = selected.length - 1; i >= 0; i--)
+		for (int i = 0; i < selected.length; i++)
 		{
 			Criterion criterion = 
 				new Criterion((Equality) criteria.getSelectedValues()[i], 

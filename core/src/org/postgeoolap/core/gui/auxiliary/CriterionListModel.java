@@ -37,6 +37,8 @@ public class CriterionListModel extends AbstractListModel
 	public Criterion remove(int index)
 	{
 		Criterion criterion = criteria.remove(index);
+		if (index == 0 && criteria.size() > 0)
+			criteria.get(0).nullifyConnection();
 		this.fireIntervalRemoved(this, index, index);
 		return criterion;
 	}

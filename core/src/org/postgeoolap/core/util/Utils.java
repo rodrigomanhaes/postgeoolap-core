@@ -227,4 +227,19 @@ public class Utils
 			list.add(t);
 		return list;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T[] revertArray(T[] source)
+	{
+		for (int i = 0; i < source.length / 2; i++)
+			swapElement(source, i, source.length - 1 - i);
+		return source;
+	}
+	
+	public static void swapElement(Object[] array, int index1, int index2)
+	{
+		Object aux = array[index1];
+		array[index1] = array[index2];
+		array[index2] = aux;
+	}
 }

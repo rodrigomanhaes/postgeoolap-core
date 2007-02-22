@@ -37,6 +37,11 @@ public class Criterion
 		return connection;
 	}
 	
+	public void nullifyConnection()
+	{
+		this.connection = null;
+	}
+	
 	@Override
 	public String toString()
 	{

@@ -39,6 +39,7 @@ public class Cube implements Serializable
 	{
 		this.id = -1;
 		dimensions = new HashSet<Dimension>();
+		aggregations = new HashSet<Aggregation>();
 	}
 	
 	public boolean wasProcessed()
